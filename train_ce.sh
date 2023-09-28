@@ -14,7 +14,7 @@ model=$script_dir/runs/mbert-qa-en
 model_type=bert
 train_data_types=xquad
 train_data_dirs=$script_dir/corpora/xquad
-ntl="0 1 2 3 4 5 6"
+ntl="3"
 
 for ntl in $ntl; do
   out_dir=$script_dir/runs/joint_train-$train_data_types/${train_langs// /-}/mbert-qa-en/ep-$epochs/ntl-$ntl/$losses/seed-$seed

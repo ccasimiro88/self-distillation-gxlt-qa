@@ -14,8 +14,8 @@ model=$script_dir/runs/mbert-qa-en
 model_type=bert
 train_data_types=xquad
 train_data_dirs=$script_dir/corpora/xquad
-ntl="0 1 2 3 4 5 6"
-temps="2 4 8 16"
+ntl="5"
+temps="2"
 
 
 for ntl in $ntl; do
