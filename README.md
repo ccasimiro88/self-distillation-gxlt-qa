@@ -38,5 +38,9 @@ We also provide scripts to evaluate the model after training. For example, to ev
 bash eval_qa.sh <model_path_trained_model> mlqa-test
 ```
 
+The evaluation result will be stored inside the trained model directory under the name `eval_results_mlqa-test`
+
+Is it possible to choose another test set between `xquad`, `mlqa-dev` and `tydiqa-goldp` datasets.
+
 # Citation
 
