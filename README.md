@@ -1,13 +1,13 @@
 # Description
 **Note that more details will provided soon**
 
-Official repository of the paper _Promoting Generalized Cross-lingual Question Answering in Few-resource Scenarios via Self-knowledge Distillation_ containing the implementation to reproduce it. 
+Official repository of the paper [Promoting Generalized Cross-lingual Question Answering in Few-resource Scenarios via Self-knowledge Distillation](https://arxiv.org/abs/2309.17134) containing the implementation to reproduce it. 
 
-Please, refer to the prepring for more details about the fundamental ideas, the method and the evaluation results: URL
+Please, refer to the preprint for more details about the fundamental ideas, the method and the evaluation results: URL
 
 
 # Installation
-First, install Python depedencies and extracting training and evaluation data.
+First, install Python dependencies and extracting training and evaluation data.
 ```bash
 bash ./setup.sh
 ```
@@ -42,5 +42,15 @@ The evaluation result will be stored inside the trained model directory under th
 
 Is it possible to choose another test set between `xquad`, `mlqa-dev` and `tydiqa-goldp` datasets.
 
-# Citation
-
+# How to Cite
+To cite our work use the following BibTex:
+```
+@misc{carrino2023promoting,
+      title={Promoting Generalized Cross-lingual Question Answering in Few-resource Scenarios via Self-knowledge Distillation}, 
+      author={Casimiro Pio Carrino and Carlos Escolano and José A. R. Fonollosa},
+      year={2023},
+      eprint={2309.17134},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL}
+}
+```
