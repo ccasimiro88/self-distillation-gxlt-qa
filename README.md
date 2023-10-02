@@ -42,6 +42,10 @@ The evaluation result will be stored inside the trained model directory under th
 
 Is it possible to choose another test set between `xquad`, `mlqa-dev` and `tydiqa-goldp` datasets.
 
+# Available models:
+We uploaded the best-performing models on the HuggingFace Models Hub under the names: [mBERT-qa-en, skd](https://huggingface.co/ccasimiro/mbert-qa-en-skd-self-distill) and [mBERT-qa-en, skd, mAP@k](https://huggingface.co/ccasimiro/mbert-qa-en-skd-map-coeff-self-distill)
+
+
 # How to Cite
 To cite our work use the following BibTex:
 ```
