@@ -1,5 +1,5 @@
 # Description
-**Note that more details will provided soon**
+**More details will provided soon!**
 
 Official repository of the paper [Promoting Generalized Cross-lingual Question Answering in Few-resource Scenarios via Self-knowledge Distillation](https://arxiv.org/abs/2309.17134) containing the implementation to reproduce it. 
 
