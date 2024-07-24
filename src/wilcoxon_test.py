@@ -1,11 +1,17 @@
 from scipy.stats import wilcoxon
-import sys
+import argparse
 
 if __name__ == "__main__":
-    file_a = sys.argv[1]
-    file_b = sys.argv[2]
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--file_a", type=str, help="File with predictions for model A")
+    parser.add_argument("--file_b", type=str, help="File with predictions for model B")
+    parser.add_argument("--alpha", type=float, default=0.05, help="Significance level")
 
-    alpha = 0.05
+    args = parser.parse_args()
+    file_a = args.file_a
+    file_b = args.file_b
+
+    alpha = args.alpha
 
     with open(file_a) as fa:
         data_a = [float(data.strip("\n")) for data in fa.readlines()]

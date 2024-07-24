@@ -1,19 +1,25 @@
 import argparse
 import json
 import sys
+from mlqa_evaluation_v1 import (
+    metric_max_over_ground_truths as mlqa_metric_max_over_ground_truths,
+)
+from mlqa_evaluation_v1 import f1_score as mlqa_f1_score
+from evaluate_v1 import metric_max_over_ground_truths, f1_score
+
 from scipy.stats import wilcoxon
 
 
 def mlqa_compute_ranked_sign_scores(
     dataset, predictions, context_lang, question_lang, dataset_type
 ):
-    from mlqa_evaluation_v1 import (
-        metric_max_over_ground_truths,
-        exact_match_score,
-        f1_score,
-    )
 
-    scores = {"f1": []}
+    scores = {
+        "testset": dataset_type,
+        "context_lang": context_lang,
+        "question_lang": question_lang,
+        "f1": [],
+    }
     for article in dataset:
         for paragraph in article["paragraphs"]:
             for qa in paragraph["qas"]:
@@ -26,13 +32,29 @@ def mlqa_compute_ranked_sign_scores(
 
                 ground_truths = list(map(lambda x: x["text"], qa["answers"]))
                 prediction = predictions[qa["id"]]
-                f1 = (
-                    metric_max_over_ground_truths(
-                        f1_score, prediction, ground_truths, context_lang
+
+                if dataset_type.startswith("mlqa"):
+
+                    f1 = (
+                        mlqa_metric_max_over_ground_truths(
+                            mlqa_f1_score, prediction, ground_truths, context_lang
+                        )
+                        * 100.0
                     )
-                    * 100.0
-                )
-                scores["f1"].append(f1)
+                    scores["f1"].append(f1)
+                elif dataset_type.startswith("xquad") or dataset_type.startswith(
+                    "tydiqa"
+                ):
+
+                    f1 = (
+                        metric_max_over_ground_truths(
+                            f1_score,
+                            prediction,
+                            ground_truths,
+                        )
+                        * 100.0
+                    )
+                    scores["f1"].append(f1)
 
     return scores
 
@@ -47,12 +69,8 @@ if __name__ == "__main__":
     parser.add_argument("--prediction_file", help="Prediction File of the model")
     parser.add_argument("--model_name", help="Model name")
     parser.add_argument("--results_file", help="Results File")
-    parser.add_argument(
-        "--context_languages", help="Languages code of answer language", nargs="+"
-    )
-    parser.add_argument(
-        "--question_languages", help="Languages code of the question", nargs="+"
-    )
+    parser.add_argument("--context_language", help="Languages code of answer language")
+    parser.add_argument("--question_language", help="Languages code of the question")
 
     args = parser.parse_args()
 
@@ -74,10 +92,11 @@ if __name__ == "__main__":
     scores = mlqa_compute_ranked_sign_scores(
         dataset,
         predictions,
-        args.context_languages,
-        args.question_languages,
+        args.context_language,
+        args.question_language,
         args.dataset_type,
     )
 
     with open(args.results_file, "a") as rs:
-        rs.writelines(str(score) + "\n" for score in scores["f1"])
+        json.dump(scores, rs)
+        rs.write("\n")

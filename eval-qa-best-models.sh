@@ -22,3 +22,5 @@ done
 # srun -p veu --mem=10G --gres=gpu:1 --pty bash eval-qa-test.sh mlqa-test
 # srun -p veu --mem=10G --gres=gpu:1 --pty bash eval-qa-test.sh tydiqa-goldp
 # srun -p veu --mem=10G --gres=gpu:1 --pty bash eval-qa-test.sh xquad
+
+srun -p veu --mem=10G --gres=gpu:1 --pty bash eval_qa.sh /home/usuaris/veu/casimiro.pio.carrino/projects/self-distillation-gxlt-qa/runs/joint_train-xquad/en-es-de-ar-vi-hi-zh/mbert-qa-en/ep-3/ntl-3/ce/seed-3 mlqa-test; bash eval_qa.sh /home/usuaris/veu/casimiro.pio.carrino/projects/self-distillation-gxlt-qa/runs/joint_train-xquad/en-es-de-ar-vi-hi-zh/mbert-qa-en/ep-3/ntl-3/ce/seed-3 xquad; bash eval_qa.sh /home/usuaris/veu/casimiro.pio.carrino/projects/self-distillation-gxlt-qa/runs/joint_train-xquad/en-es-de-ar-vi-hi-zh/mbert-qa-en/ep-3/ntl-3/ce/seed-3 tydiqa-goldp

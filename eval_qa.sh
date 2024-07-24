@@ -85,7 +85,7 @@ if [[ ! -f $model_dir/eval_results_$testset && -f $model_dir/pytorch_model.bin ]
             predict_file=$data_dir/tydiqa-goldp-dev-$l.json
             prediction_file=$eval_dir/predictions_tydiqa-goldp-dev-$l.json
 
-            python $script_dir/src/metrics/evaluate-v1.1.py \
+            python $script_dir/src/metrics/evaluate_v1.py \
                 --dataset_file $predict_file \
                 --dataset_type $testset \
                 --prediction_file $prediction_file \
@@ -99,7 +99,7 @@ if [[ ! -f $model_dir/eval_results_$testset && -f $model_dir/pytorch_model.bin ]
             predict_file=$data_dir/xquad.$l.json
             prediction_file=$eval_dir/predictions_xquad.$l.json
 
-            python $script_dir/src/metrics/evaluate-v1.1.py \
+            python $script_dir/src/metrics/evaluate_v1.py \
                 --dataset_file $predict_file \
                 --dataset_type $testset \
                 --prediction_file $prediction_file \
