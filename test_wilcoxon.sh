@@ -1,288 +1,330 @@
+#!/bin/bash
 script_dir="$(cd "$(dirname "$0")" && pwd)"
 
+# SKD vs CE
+model_dir_a=$script_dir/runs/joint_train-xquad/en-es-de-ar-vi-hi-zh/mbert-qa-en/ep-3/ntl-3/ce/seed-3
+model_dir_b=$script_dir/runs/joint_train-xquad/en-es-de-ar-vi-hi-zh/mbert-qa-en/ep-3/ntl-5/skd/temp-2/seed-3/seed-3/
 
-# CE
-model_dir=$script_dir/runs/joint_train-xquad/en-es-de-ar-vi-hi-zh/mbert-qa-en/ep-3/ntl-3/ce/seed-3
-model="ce"
+results_file=$model_dir_b/test_wilcoxon_results_skd_vs_ce
+if [ ! -f $results_file ]; then
+    echo "" | tee $results_file
 
-# MLQA
-mlqa_langs="en es de ar hi vi zh"
-
-# MLQA-dev
-testset=mlqa-dev
-results_file=$model_dir/eval_results_example_level_${testset}_$model
-
-if [ ! -f "$results_file" ]; then
-    for cl in $mlqa_langs; do
-        for ql in $mlqa_langs; do
-        
-        predict_file=$script_dir/corpora/MLQA_V1/dev/dev-context-$cl-question-$ql.json
-        prediction_file=$model_dir/preds/predictions_dev-context-$cl-question-$ql.json
+    # MLQA-dev
+    # G-XLT
+    testset=mlqa-dev
+    task=G-XLT
+    model_a=ce
+    model_b=skd
+    file_a=$model_dir_a/eval_results_example_level_${testset}_${model_a}
+    file_b=$model_dir_b/eval_results_example_level_${testset}_${model_b}
 
 
-        python $script_dir/src/metrics/example_level_scores.py \
-                        --dataset_file $predict_file \
-                        --dataset_type $testset \
-                        --prediction_file $prediction_file \
-                        --model $model \
-                        --results_file $model_dir/eval_results_example_level_${testset}_$model \
-                        --context_language $cl \
-                        --question_language $ql 
-        done
+    echo "Testset: ${testset}" | tee -a $results_file
+    echo "Task: ${task}" | tee -a $results_file
+    python $script_dir/src/wilcoxon_test.py --file_a $file_a --file_b $file_b --do_gxlt | tee -a $results_file
+    echo "" | tee -a $results_file
+
+    # XLT
+    testset=mlqa-dev
+    task=XLT
+    model_a=ce
+    model_b=skd
+    file_a=$model_dir_a/eval_results_example_level_${testset}_${model_a}
+    file_b=$model_dir_b/eval_results_example_level_${testset}_${model_b}
+
+    langs="en es de ar hi vi zh"
+
+
+    echo "Testset: ${testset}" | tee -a $results_file
+    echo "Task: ${task}" | tee -a $results_file
+    python $script_dir/src/wilcoxon_test.py --file_a $file_a --file_b $file_b | tee -a $results_file
+    echo "" | tee -a $results_file
+
+    # XLT
+    testset=mlqa-dev
+    task=XLT
+    model_a=ce
+    model_b=skd
+    file_a=$model_dir_a/eval_results_example_level_${testset}_${model_a}
+    file_b=$model_dir_b/eval_results_example_level_${testset}_${model_b}
+
+    for lang in $langs; do
+        langs="en es de ar hi vi zh"
+
+
+        echo "Testset: ${testset}" | tee -a $results_file
+        echo "Task: ${task}" | tee -a $results_file
+        echo "Languages: ${lang}" | tee -a $results_file
+        python $script_dir/src/wilcoxon_test.py --file_a $file_a --file_b $file_b --languages $lang | tee -a $results_file
+        echo "" | tee -a $results_file
+    done
+
+    # MLQA-test
+    # G-XLT
+    testset=mlqa-test
+    task=G-XLT
+    model_a=ce
+    model_b=skd
+    file_a=$model_dir_a/eval_results_example_level_${testset}_${model_a}
+    file_b=$model_dir_b/eval_results_example_level_${testset}_${model_b}
+
+
+    echo "Testset: ${testset}" | tee -a $results_file
+    echo "Task: ${task}" | tee -a $results_file
+    python $script_dir/src/wilcoxon_test.py --file_a $file_a --file_b $file_b --do_gxlt | tee -a $results_file
+    echo "" | tee -a $results_file
+
+    # XLT
+    testset=mlqa-test
+    task=XLT
+    model_a=ce
+    model_b=skd
+    file_a=$model_dir_a/eval_results_example_level_${testset}_${model_a}
+    file_b=$model_dir_b/eval_results_example_level_${testset}_${model_b}
+
+    langs="en es de ar hi vi zh"
+
+
+    echo "Testset: ${testset}" | tee -a $results_file
+    echo "Task: ${task}" | tee -a $results_file
+    python $script_dir/src/wilcoxon_test.py --file_a $file_a --file_b $file_b | tee -a $results_file
+    echo "" | tee -a $results_file
+
+    # XLT - single language
+    testset=mlqa-test
+    task=XLT
+    model_a=ce
+    model_b=skd
+    file_a=$model_dir_a/eval_results_example_level_${testset}_${model_a}
+    file_b=$model_dir_b/eval_results_example_level_${testset}_${model_b}
+
+    for lang in $langs; do
+        langs="en es de ar hi vi zh"
+
+
+        echo "Testset: ${testset}" | tee -a $results_file
+        echo "Task: ${task}" | tee -a $results_file
+        echo "Languages: ${lang}" | tee -a $results_file
+        python $script_dir/src/wilcoxon_test.py --file_a $file_a --file_b $file_b --languages $lang | tee -a $results_file
+        echo "" | tee -a $results_file
     done
 fi
 
-# MLQA-test
-testset=mlqa-test
-results_file=$model_dir/eval_results_example_level_${testset}_$model
+# SKD_MAP vs CE
+model_dir_a=$script_dir/runs/joint_train-xquad/en-es-de-ar-vi-hi-zh/mbert-qa-en/ep-3/ntl-3/ce/seed-3
+model_dir_b=$script_dir/runs/joint_train-xquad/en-es-de-ar-vi-hi-zh/mbert-qa-en/ep-3/ntl-5/skd_map/temp-2/seed-3/seed-3
 
-if [ ! -f "$results_file" ]; then
-    for cl in $mlqa_langs; do
-        for ql in $mlqa_langs; do
-       
-        predict_file=$script_dir/corpora/MLQA_V1/test/test-context-$cl-question-$ql.json
-        prediction_file=$model_dir/preds/predictions_test-context-$cl-question-$ql.json
+results_file=$model_dir_b/test_wilcoxon_results_skd_map_vs_ce
+if [ ! -f $results_file ]; then
+    echo "" | tee $results_file
+
+    # MLQA-dev
+    # G-XLT
+    testset=mlqa-dev
+    task=G-XLT
+    model_a=ce
+    model_b=skd_map
+    file_a=$model_dir_a/eval_results_example_level_${testset}_${model_a}
+    file_b=$model_dir_b/eval_results_example_level_${testset}_${model_b}
 
 
-        python $script_dir/src/metrics/example_level_scores.py \
-                        --dataset_file $predict_file \
-                        --dataset_type $testset \
-                        --prediction_file $prediction_file \
-                        --model $model \
-                        --results_file $model_dir/eval_results_example_level_${testset}_$model \
-                        --context_language $cl \
-                        --question_language $ql 
-        done
+    echo "Testset: ${testset}" | tee -a $results_file
+    echo "Task: ${task}" | tee -a $results_file
+    python $script_dir/src/wilcoxon_test.py --file_a $file_a --file_b $file_b --do_gxlt | tee -a $results_file
+    echo "" | tee -a $results_file
+
+    # XLT
+    testset=mlqa-dev
+    task=XLT
+    model_a=ce
+    model_b=skd_map
+    file_a=$model_dir_a/eval_results_example_level_${testset}_${model_a}
+    file_b=$model_dir_b/eval_results_example_level_${testset}_${model_b}
+
+    langs="en es de ar hi vi zh"
+
+
+    echo "Testset: ${testset}" | tee -a $results_file
+    echo "Task: ${task}" | tee -a $results_file
+    python $script_dir/src/wilcoxon_test.py --file_a $file_a --file_b $file_b | tee -a $results_file
+    echo "" | tee -a $results_file
+
+    # XLT
+    testset=mlqa-dev
+    task=XLT
+    model_a=ce
+    model_b=skd_map
+    file_a=$model_dir_a/eval_results_example_level_${testset}_${model_a}
+    file_b=$model_dir_b/eval_results_example_level_${testset}_${model_b}
+
+    for lang in $langs; do
+        langs="en es de ar hi vi zh"
+
+
+        echo "Testset: ${testset}" | tee -a $results_file
+        echo "Task: ${task}" | tee -a $results_file
+        echo "Languages: ${lang}" | tee -a $results_file
+        python $script_dir/src/wilcoxon_test.py --file_a $file_a --file_b $file_b --languages $lang | tee -a $results_file
+        echo "" | tee -a $results_file
     done
-fi
 
-# XQUAD
-xquad_langs="en es de ar hi vi zh el ru tr th"
-testset=xquad
-results_file=$model_dir/eval_results_example_level_${testset}_$model
-if [ ! -f "$results_file" ]; then
-    for l in $xquad_langs; do
-        predict_file=$script_dir/corpora/xquad/xquad.$l.json
-        prediction_file=$model_dir/preds/predictions_xquad.$l.json
-
-        python $script_dir/src/metrics/example_level_scores.py \
-                    --dataset_file $predict_file \
-                    --dataset_type $testset \
-                    --prediction_file $prediction_file \
-                    --model $model \
-                    --results_file $model_dir/eval_results_example_level_${testset}_$model \
-                    --context_language $l \
-                    --question_language $l 
-    done
-fi
-
-# TyDiQA-goldp
-tydiqa_langs="english arabic bengali finnish indonesian korean russian swahili telugu"
-testset=tydiqa-goldp
-results_file=$model_dir/eval_results_example_level_${testset}_$model
-if [ ! -f "$results_file" ]; then
-    for l in $tydiqa_langs; do
-        predict_file=$script_dir/corpora/tydiqa-goldp-v1.1-dev/tydiqa-goldp-dev-$l.json
-        prediction_file=$model_dir/preds/predictions_tydiqa-goldp-dev-$l.json
-
-        python $script_dir/src/metrics/example_level_scores.py \
-                        --dataset_file $predict_file \
-                        --dataset_type $testset \
-                        --prediction_file $prediction_file \
-                        --model $model \
-                        --results_file $model_dir/eval_results_example_level_${testset}_$model \
-                        --context_language $l \
-                        --question_language $l 
-    done
-fi
-
-# SKD
-model_dir=$script_dir/runs/joint_train-xquad/en-es-de-ar-vi-hi-zh/mbert-qa-en/ep-3/ntl-5/skd/temp-2/seed-3/seed-3
-model="skd"
-
-# MLQA
-mlqa_langs="en es de ar hi vi zh"
-
-# MLQA-dev
-testset=mlqa-dev
-results_file=$model_dir/eval_results_example_level_${testset}_$model
-
-if [ ! -f "$results_file" ]; then
-    for cl in $mlqa_langs; do
-        for ql in $mlqa_langs; do
-        
-        predict_file=$script_dir/corpora/MLQA_V1/dev/dev-context-$cl-question-$ql.json
-        prediction_file=$model_dir/preds/predictions_dev-context-$cl-question-$ql.json
+    # MLQA-test
+    # G-XLT
+    testset=mlqa-test
+    task=G-XLT
+    model_a=ce
+    model_b=skd_map
+    file_a=$model_dir_a/eval_results_example_level_${testset}_${model_a}
+    file_b=$model_dir_b/eval_results_example_level_${testset}_${model_b}
 
 
-        python $script_dir/src/metrics/example_level_scores.py \
-                        --dataset_file $predict_file \
-                        --dataset_type $testset \
-                        --prediction_file $prediction_file \
-                        --model $model \
-                        --results_file $model_dir/eval_results_example_level_${testset}_$model \
-                        --context_language $cl \
-                        --question_language $ql 
-        done
-    done
-fi
+    echo "Testset: ${testset}" | tee -a $results_file
+    echo "Task: ${task}" | tee -a $results_file
+    python $script_dir/src/wilcoxon_test.py --file_a $file_a --file_b $file_b --do_gxlt | tee -a $results_file
+    echo "" | tee -a $results_file
 
-# MLQA-test
-testset=mlqa-test
-results_file=$model_dir/eval_results_example_level_${testset}_$model
+    # XLT
+    testset=mlqa-test
+    task=XLT
+    model_a=ce
+    model_b=skd_map
+    file_a=$model_dir_a/eval_results_example_level_${testset}_${model_a}
+    file_b=$model_dir_b/eval_results_example_level_${testset}_${model_b}
 
-if [ ! -f "$results_file" ]; then
-    for cl in $mlqa_langs; do
-        for ql in $mlqa_langs; do
-       
-        predict_file=$script_dir/corpora/MLQA_V1/test/test-context-$cl-question-$ql.json
-        prediction_file=$model_dir/preds/predictions_test-context-$cl-question-$ql.json
+    langs="en es de ar hi vi zh"
 
 
-        python $script_dir/src/metrics/example_level_scores.py \
-                        --dataset_file $predict_file \
-                        --dataset_type $testset \
-                        --prediction_file $prediction_file \
-                        --model $model \
-                        --results_file $model_dir/eval_results_example_level_${testset}_$model \
-                        --context_language $cl \
-                        --question_language $ql 
-        done
-    done
-fi
+    echo "Testset: ${testset}" | tee -a $results_file
+    echo "Task: ${task}" | tee -a $results_file
+    python $script_dir/src/wilcoxon_test.py --file_a $file_a --file_b $file_b | tee -a $results_file
+    echo "" | tee -a $results_file
 
-# XQUAD
-xquad_langs="en es de ar hi vi zh el ru tr th"
-testset=xquad
-results_file=$model_dir/eval_results_example_level_${testset}_$model
-if [ ! -f "$results_file" ]; then
-    for l in $xquad_langs; do
-        predict_file=$script_dir/corpora/xquad/xquad.$l.json
-        prediction_file=$model_dir/preds/predictions_xquad.$l.json
+    # XLT - single language
+    testset=mlqa-test
+    task=XLT
+    model_a=ce
+    model_b=skd_map
+    file_a=$model_dir_a/eval_results_example_level_${testset}_${model_a}
+    file_b=$model_dir_b/eval_results_example_level_${testset}_${model_b}
 
-        python $script_dir/src/metrics/example_level_scores.py \
-                    --dataset_file $predict_file \
-                    --dataset_type $testset \
-                    --prediction_file $prediction_file \
-                    --model $model \
-                    --results_file $model_dir/eval_results_example_level_${testset}_$model \
-                    --context_language $l \
-                    --question_language $l 
-    done
-fi
+    for lang in $langs; do
+        langs="en es de ar hi vi zh"
 
-# TyDiQA-goldp
-tydiqa_langs="english arabic bengali finnish indonesian korean russian swahili telugu"
-testset=tydiqa-goldp
-results_file=$model_dir/eval_results_example_level_${testset}_$model
-if [ ! -f "$results_file" ]; then
-    for l in $tydiqa_langs; do
-        predict_file=$script_dir/corpora/tydiqa-goldp-v1.1-dev/tydiqa-goldp-dev-$l.json
-        prediction_file=$model_dir/preds/predictions_tydiqa-goldp-dev-$l.json
 
-        python $script_dir/src/metrics/example_level_scores.py \
-                        --dataset_file $predict_file \
-                        --dataset_type $testset \
-                        --prediction_file $prediction_file \
-                        --model $model \
-                        --results_file $model_dir/eval_results_example_level_${testset}_$model \
-                        --context_language $l \
-                        --question_language $l 
+        echo "Testset: ${testset}" | tee -a $results_file
+        echo "Task: ${task}" | tee -a $results_file
+        echo "Languages: ${lang}" | tee -a $results_file
+        python $script_dir/src/wilcoxon_test.py --file_a $file_a --file_b $file_b --languages $lang | tee -a $results_file
+        echo "" | tee -a $results_file
     done
 fi
 
 
-# SKD-MAP
-model_dir=$script_dir/runs/joint_train-xquad/en-es-de-ar-vi-hi-zh/mbert-qa-en/ep-3/ntl-5/skd_map/temp-2/seed-3/seed-3
-model="skd"
+# SKD_MAP vs SKD
+model_dir_a=$script_dir/runs/joint_train-xquad/en-es-de-ar-vi-hi-zh/mbert-qa-en/ep-3/ntl-5/skd/temp-2/seed-3/seed-3
+model_dir_b=$script_dir/runs/joint_train-xquad/en-es-de-ar-vi-hi-zh/mbert-qa-en/ep-3/ntl-5/skd_map/temp-2/seed-3/seed-3
 
-# MLQA
-mlqa_langs="en es de ar hi vi zh"
+results_file=$model_dir_b/test_wilcoxon_results_skd_map_vs_skd
+if [ ! -f $results_file ]; then
+    echo "" | tee $results_file
 
-# MLQA-dev
-testset=mlqa-dev
-results_file=$model_dir/eval_results_example_level_${testset}_$model
-
-if [ ! -f "$results_file" ]; then
-    for cl in $mlqa_langs; do
-        for ql in $mlqa_langs; do
-        
-        predict_file=$script_dir/corpora/MLQA_V1/dev/dev-context-$cl-question-$ql.json
-        prediction_file=$model_dir/preds/predictions_dev-context-$cl-question-$ql.json
+    # MLQA-dev
+    # G-XLT
+    testset=mlqa-dev
+    task=G-XLT
+    model_a=skd
+    model_b=skd_map
+    file_a=$model_dir_a/eval_results_example_level_${testset}_${model_a}
+    file_b=$model_dir_b/eval_results_example_level_${testset}_${model_b}
 
 
-        python $script_dir/src/metrics/example_level_scores.py \
-                        --dataset_file $predict_file \
-                        --dataset_type $testset \
-                        --prediction_file $prediction_file \
-                        --model $model \
-                        --results_file $model_dir/eval_results_example_level_${testset}_$model \
-                        --context_language $cl \
-                        --question_language $ql 
-        done
+    echo "Testset: ${testset}" | tee -a $results_file
+    echo "Task: ${task}" | tee -a $results_file
+    python $script_dir/src/wilcoxon_test.py --file_a $file_a --file_b $file_b --do_gxlt | tee -a $results_file
+    echo "" | tee -a $results_file
+
+    # XLT
+    testset=mlqa-dev
+    task=XLT
+    model_a=skd
+    model_b=skd_map
+    file_a=$model_dir_a/eval_results_example_level_${testset}_${model_a}
+    file_b=$model_dir_b/eval_results_example_level_${testset}_${model_b}
+
+    langs="en es de ar hi vi zh"
+
+
+    echo "Testset: ${testset}" | tee -a $results_file
+    echo "Task: ${task}" | tee -a $results_file
+    python $script_dir/src/wilcoxon_test.py --file_a $file_a --file_b $file_b | tee -a $results_file
+    echo "" | tee -a $results_file
+
+    # XLT
+    testset=mlqa-dev
+    task=XLT
+    model_a=skd
+    model_b=skd_map
+    file_a=$model_dir_a/eval_results_example_level_${testset}_${model_a}
+    file_b=$model_dir_b/eval_results_example_level_${testset}_${model_b}
+
+    for lang in $langs; do
+        langs="en es de ar hi vi zh"
+
+
+        echo "Testset: ${testset}" | tee -a $results_file
+        echo "Task: ${task}" | tee -a $results_file
+        echo "Languages: ${lang}" | tee -a $results_file
+        python $script_dir/src/wilcoxon_test.py --file_a $file_a --file_b $file_b --languages $lang | tee -a $results_file
+        echo "" | tee -a $results_file
     done
-fi
 
-# MLQA-test
-testset=mlqa-test
-results_file=$model_dir/eval_results_example_level_${testset}_$model
-
-if [ ! -f "$results_file" ]; then
-    for cl in $mlqa_langs; do
-        for ql in $mlqa_langs; do
-       
-        predict_file=$script_dir/corpora/MLQA_V1/test/test-context-$cl-question-$ql.json
-        prediction_file=$model_dir/preds/predictions_test-context-$cl-question-$ql.json
+    # MLQA-test
+    # G-XLT
+    testset=mlqa-test
+    task=G-XLT
+    model_a=skd
+    model_b=skd_map
+    file_a=$model_dir_a/eval_results_example_level_${testset}_${model_a}
+    file_b=$model_dir_b/eval_results_example_level_${testset}_${model_b}
 
 
-        python $script_dir/src/metrics/example_level_scores.py \
-                        --dataset_file $predict_file \
-                        --dataset_type $testset \
-                        --prediction_file $prediction_file \
-                        --model $model \
-                        --results_file $model_dir/eval_results_example_level_${testset}_$model \
-                        --context_language $cl \
-                        --question_language $ql 
-        done
-    done
-fi
+    echo "Testset: ${testset}" | tee -a $results_file
+    echo "Task: ${task}" | tee -a $results_file
+    python $script_dir/src/wilcoxon_test.py --file_a $file_a --file_b $file_b --do_gxlt | tee -a $results_file
+    echo "" | tee -a $results_file
 
-# XQUAD
-xquad_langs="en es de ar hi vi zh el ru tr th"
-testset=xquad
-results_file=$model_dir/eval_results_example_level_${testset}_$model
-if [ ! -f "$results_file" ]; then
-    for l in $xquad_langs; do
-        predict_file=$script_dir/corpora/xquad/xquad.$l.json
-        prediction_file=$model_dir/preds/predictions_xquad.$l.json
+    # XLT
+    testset=mlqa-test
+    task=XLT
+    model_a=skd
+    model_b=skd_map
+    file_a=$model_dir_a/eval_results_example_level_${testset}_${model_a}
+    file_b=$model_dir_b/eval_results_example_level_${testset}_${model_b}
 
-        python $script_dir/src/metrics/example_level_scores.py \
-                    --dataset_file $predict_file \
-                    --dataset_type $testset \
-                    --prediction_file $prediction_file \
-                    --model $model \
-                    --results_file $model_dir/eval_results_example_level_${testset}_$model \
-                    --context_language $l \
-                    --question_language $l 
-    done
-fi
+    langs="en es de ar hi vi zh"
 
-# TyDiQA-goldp
-tydiqa_langs="english arabic bengali finnish indonesian korean russian swahili telugu"
-testset=tydiqa-goldp
-results_file=$model_dir/eval_results_example_level_${testset}_$model
-if [ ! -f "$results_file" ]; then
-    for l in $tydiqa_langs; do
-        predict_file=$script_dir/corpora/tydiqa-goldp-v1.1-dev/tydiqa-goldp-dev-$l.json
-        prediction_file=$model_dir/preds/predictions_tydiqa-goldp-dev-$l.json
 
-        python $script_dir/src/metrics/example_level_scores.py \
-                        --dataset_file $predict_file \
-                        --dataset_type $testset \
-                        --prediction_file $prediction_file \
-                        --model $model \
-                        --results_file $model_dir/eval_results_example_level_${testset}_$model \
-                        --context_language $l \
-                        --question_language $l 
+    echo "Testset: ${testset}" | tee -a $results_file
+    echo "Task: ${task}" | tee -a $results_file
+    python $script_dir/src/wilcoxon_test.py --file_a $file_a --file_b $file_b | tee -a $results_file
+    echo "" | tee -a $results_file
+
+    # XLT - single language
+    testset=mlqa-test
+    task=XLT
+    model_a=skd
+    model_b=skd_map
+    file_a=$model_dir_a/eval_results_example_level_${testset}_${model_a}
+    file_b=$model_dir_b/eval_results_example_level_${testset}_${model_b}
+
+    for lang in $langs; do
+        langs="en es de ar hi vi zh"
+
+
+        echo "Testset: ${testset}" | tee -a $results_file
+        echo "Task: ${task}" | tee -a $results_file
+        echo "Languages: ${lang}" | tee -a $results_file
+        python $script_dir/src/wilcoxon_test.py --file_a $file_a --file_b $file_b --languages $lang | tee -a $results_file
+        echo "" | tee -a $results_file
     done
 fi
