@@ -1,48 +1,54 @@
 #!/bin/bash
 source ../venv/bin/activate
 
-for metric in f1 em; do
+for metric in F1 EM; do
 # mBERT-qa-en
 eval_file="./runs/mbert-qa-en/eval_results_mlqa-dev"
-suffix="mBERT-qa-en, zero-shot"
-testset=mlqa-dev
+suffix="mBERT-qa-en, ZS, MLQA-dev"
+testset=MLQA-dev
 python src/figures/heatmap.py --file $eval_file --suffix "$suffix" --testset $testset --metric $metric
+
 eval_file="./runs/mbert-qa-en/eval_results_mlqa-test"
-suffix="mBERT-qa-en, zero-shot"
-testset=mlqa-test
+suffix="mBERT-qa-en, ZS, MLQA-test"
+testset=MLQA-test
 python src/figures/heatmap.py --file $eval_file --suffix "$suffix" --testset $testset --metric $metric
 
 # skd + map
-eval_file=./runs/joint_train-xquad/en-es-de-ar-vi-hi-zh/mbert-qa-en/ep-3/ntl-5/skd_map/temp-2/seed-3/eval_results_mlqa-test
-suffix="mBERT-qa-en, skd + MAP@k"
-testset=mlqa-test
+eval_file=./runs/joint_train-xquad/en-es-de-ar-vi-hi-zh/mbert-qa-en/ep-3/ntl-5/ce-kl-fw-map-coeff-self-distil/temp-2/seed-3/eval_results_mlqa-test
+suffix="mBERT-qa-en, SKD, mAP@k"
+testset=MLQA-test
 python src/figures/heatmap.py --file $eval_file --suffix "$suffix" --testset $testset  --metric $metric
-eval_file=./runs/joint_train-xquad/en-es-de-ar-vi-hi-zh/mbert-qa-en/ep-3/ntl-5/skd_map/temp-2/seed-3/eval_results_mlqa-dev
-suffix="mBERT-qa-en, skd + MAP@k"
-testset=mlqa-dev
+
+eval_file=./runs/joint_train-xquad/en-es-de-ar-vi-hi-zh/mbert-qa-en/ep-3/ntl-5/ce-kl-fw-map-coeff-self-distil/temp-2/seed-3/eval_results_mlqa-dev
+suffix="mBERT-qa-en, SKD, mAP@k"
+testset=MLQA-dev
 python src/figures/heatmap.py --file $eval_file --suffix "$suffix" --testset $testset  --metric $metric
-eval_files=$(find ./runs/joint_train-xquad -path "*skd_map*eval_results_mlqa-dev")
+
+eval_files=$(find ./runs/joint_train-xquad -path "*ce-kl-fw-map-coeff-self-distil*eval_results_mlqa-dev")
 python src/figures/heatmap.py --files $eval_files --suffix "$suffix" --testset $testset --heatmap_type "temp-vs-ntl"  --metric $metric
 
 # skd 
-eval_file=./runs/joint_train-xquad/en-es-de-ar-vi-hi-zh/mbert-qa-en/ep-3/ntl-5/skd/temp-2/seed-3/eval_results_mlqa-test
-suffix="mBERT-qa-en, skd"
-testset=mlqa-test
+eval_file=./runs/joint_train-xquad/en-es-de-ar-vi-hi-zh/mbert-qa-en/ep-3/ntl-5/ce-kl-fw-self-distil/temp-2/seed-3/eval_results_mlqa-test
+suffix="mBERT-qa-en, SKD"
+testset=MLQA-test
 python src/figures/heatmap.py --file $eval_file --suffix "$suffix" --testset $testset  --metric $metric
-eval_file=./runs/joint_train-xquad/en-es-de-ar-vi-hi-zh/mbert-qa-en/ep-3/ntl-5/skd/temp-2/seed-3/eval_results_mlqa-dev
-suffix="mBERT-qa-en, skd"
-testset=mlqa-dev
+
+eval_file=./runs/joint_train-xquad/en-es-de-ar-vi-hi-zh/mbert-qa-en/ep-3/ntl-5/ce-kl-fw-self-distil/temp-2/seed-3/eval_results_mlqa-dev
+suffix="mBERT-qa-en, SKD"
+testset=MLQA-dev
 python src/figures/heatmap.py --file $eval_file --suffix "$suffix" --testset $testset
-eval_files=$(find ./runs/joint_train-xquad -path "*skd*eval_results_mlqa-dev")
+
+eval_files=$(find ./runs/joint_train-xquad -path "*ce-kl-fw-self-distil*eval_results_mlqa-dev")
 python src/figures/heatmap.py --files $eval_files --suffix "$suffix" --testset $testset --heatmap_type "temp-vs-ntl" --metric $metric
 
 # CE 
 eval_file=./runs/joint_train-xquad/en-es-de-ar-vi-hi-zh/mbert-qa-en/ep-3/ntl-3/ce/seed-3/eval_results_mlqa-test
-suffix="mBERT-qa-en, ce"
-testset=mlqa-test
+suffix="mBERT-qa-en, CE"
+testset=MLQA-test
 python src/figures/heatmap.py --file $eval_file --suffix "$suffix" --testset $testset  --metric $metric
+
 eval_file=./runs/joint_train-xquad/en-es-de-ar-vi-hi-zh/mbert-qa-en/ep-3/ntl-3/ce/seed-3/eval_results_mlqa-dev
-suffix="mBERT-qa-en, ce"
-testset=mlqa-dev
+suffix="mBERT-qa-en, CE"
+testset=MLQA-dev
 python src/figures/heatmap.py --file $eval_file --suffix "$suffix" --testset $testset  --metric $metric
 done

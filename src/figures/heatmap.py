@@ -1,4 +1,3 @@
-from distutils.log import debug
 import seaborn as sns
 import pandas as pd
 import json
@@ -9,7 +8,21 @@ import math
 import re
 from argparse import ArgumentParser
 
+# Set the style and parameters for high-quality figures
 sns.set_theme()
+plt.rcParams.update(
+    {
+        "figure.figsize": (10, 8),
+        "figure.dpi": 300,
+        "savefig.dpi": 300,
+        "font.size": 12,
+        "axes.titlesize": 14,
+        "axes.labelsize": 12,
+        "legend.fontsize": 10,
+        "xtick.labelsize": 10,
+        "ytick.labelsize": 10,
+    }
+)
 
 
 def score_question_context_matrix(file, langs, score_type):
@@ -42,6 +55,7 @@ if __name__ == "__main__":
 
     script_dir = os.path.dirname(os.path.realpath(__file__))
     output_dir = os.path.join(script_dir, "../../runs/figures")
+    os.makedirs(output_dir, exist_ok=True)
 
     testset = args.testset
     file = args.file
@@ -49,36 +63,53 @@ if __name__ == "__main__":
     heatmap_type = args.heatmap_type
     metric = args.metric
 
-    file_ref = f"./runs/mbert-qa-en/eval_results_{testset}"
-    file_ref_all_dev = f"./runs/results-all-{metric}-mlqa-dev-3.csv"
+    file_ref = f"./runs/mbert-qa-en/eval_results_{testset.lower()}"
+    file_ref_all_dev = f"./runs/scores/results-all-{metric.lower()}-mlqa-dev-3.csv"
     langs = "en es de ar vi hi zh".split()
 
     if heatmap_type == "question-context-gxlt":
         # compute reference heatmap (mBERT-qa-en) and print it
-        df_ref = score_question_context_matrix(file_ref, langs, metric)
+        df_ref = score_question_context_matrix(file_ref, langs, metric.lower())
         min_value = math.floor(df_ref.to_numpy().min())
         max_value = math.ceil(df_ref.to_numpy().max())
         sns.heatmap(
-            df_ref, annot=True, cmap="Blues", fmt=".1f", vmin=min_value, vmax=max_value
+            df_ref,
+            annot=True,
+            cmap="Blues",
+            fmt=".1f",
+            vmin=min_value,
+            vmax=max_value,
+            cbar_kws={"label": metric},
         )
-        plt.title(f"mBERT-qa-en, zero-shot - {metric} - {testset}")
+        plt.title(f"mBERT-qa-en, ZS")
+        plt.xlabel("Context Language")
+        plt.ylabel("Question Language")
+        plt.tight_layout()
+        plt.savefig(
+            f"{output_dir}/heatmap-gxlt_mBERT-qa-en_{testset.lower()}_{metric.lower()}.png"
+        )
         plt.show()
-        plt.savefig(f"{output_dir}/heatmap-gxlt_mBERT-qa-en_{testset}_{metric}")
         plt.clf()
 
-        df = score_question_context_matrix(file, langs, metric)
+        df = score_question_context_matrix(file, langs, metric.lower())
         df_dif = df - df_ref
-        # sns.heatmap(df, annot=True, fmt=".1f", vmin=29, vmax=81, cmap=sns.cm.rocket_r)
-        # sns.heatmap(df_dif, annot=True, cmap="Blues", fmt=".1f", vmin=10, vmax=20)
         sns.heatmap(
-            df_dif, annot=True, cmap=sns.cm.rocket_r, fmt=".1f", vmin=-5, vmax=22
+            df_dif,
+            annot=True,
+            cmap=sns.cm.rocket_r,
+            fmt=".1f",
+            vmin=-5,
+            vmax=22,
+            cbar_kws={"label": f"Δ {metric}"},
         )
-        # plt.title(f'{suffix} - ΔF1 (G-XLT)')
-        plt.title(f"{suffix} - {metric} - {testset}")
-        plt.show()
+        plt.title(f"{suffix}")
+        plt.xlabel("Context Language")
+        plt.ylabel("Question Language")
+        plt.tight_layout()
         plt.savefig(
-            f"{output_dir}/heatmap-gxlt_{suffix.replace(' ', '')}_{testset}_{metric}"
+            f"{output_dir}/heatmap-gxlt_{suffix.lower().replace(' ', '').replace('+', ',')}_{testset.lower()}_{metric.lower()}.png"
         )
+        plt.show()
         plt.clf()
 
     elif heatmap_type == "temp-vs-ntl":
@@ -101,11 +132,20 @@ if __name__ == "__main__":
         vmin = round(min([s["f1_gxlt"] for s in scores]), 2)
         vmax = round(max([s["f1_gxlt"] for s in scores]), 2)
         sns.heatmap(
-            df, annot=True, cmap=sns.cm.rocket_r, fmt=".2f", vmin=vmin, vmax=vmax
+            df,
+            annot=True,
+            cmap=sns.cm.rocket_r,
+            fmt=".2f",
+            vmin=vmin,
+            vmax=vmax,
+            cbar_kws={"label": f"{metric} (G-XLT)"},
         )
-        plt.title(f"{suffix} - {metric} (G-XLT) - {testset} ")
-        plt.show()
+        plt.title(f"{suffix}")
+        plt.xlabel("NTL")
+        plt.ylabel("Temperature")
+        plt.tight_layout()
         plt.savefig(
-            f"{output_dir}/heatmap-temp-ntl-gxlt-{suffix.replace(' ', '')}_{testset}_{metric}.png"
+            f"{output_dir}/heatmap-temp-ntl-gxlt-{suffix.lower().replace(' ', '').replace('+', ',')}_{testset.lower()}_{metric.lower()}.png"
         )
+        plt.show()
         plt.clf()

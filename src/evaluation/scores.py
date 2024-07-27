@@ -59,8 +59,10 @@ for file in files.split():
         scores[f"{language}-mean"].append(round(mean, 2))
 print(scores)
 
+output_file = f"runs/scores/{output_filename}-{metric}-{testset}-{seed}.csv"
+os.makedirs(os.path.dirname(output_file), exist_ok=True)
 pd.DataFrame.from_dict(scores).to_csv(
-    f"runs/{output_filename}-{metric}-{testset}-{seed}.csv",
+    f"runs/scores/{output_filename}-{metric}-{testset}-{seed}.csv",
     mode="w",
     index=False,
 )
