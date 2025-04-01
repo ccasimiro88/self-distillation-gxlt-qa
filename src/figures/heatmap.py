@@ -15,12 +15,12 @@ plt.rcParams.update(
         "figure.figsize": (10, 8),
         "figure.dpi": 300,
         "savefig.dpi": 300,
-        "font.size": 12,
-        "axes.titlesize": 14,
-        "axes.labelsize": 12,
-        "legend.fontsize": 10,
-        "xtick.labelsize": 10,
-        "ytick.labelsize": 10,
+        "font.size": 18,
+        "axes.titlesize": 18,
+        "axes.labelsize": 18,
+        "legend.fontsize": 18,
+        "xtick.labelsize": 18,
+        "ytick.labelsize": 18,
     }
 )
 
@@ -64,7 +64,10 @@ if __name__ == "__main__":
     metric = args.metric
 
     file_ref = f"./runs/mbert-qa-en/eval_results_{testset.lower()}"
-    file_ref_all_dev = f"./runs/scores/results-all-{metric.lower()}-mlqa-dev-3.csv"
+    try:
+        file_ref_all_dev = f"./runs/scores/results-all-{metric.lower()}-mlqa-dev-3.csv"
+    except AttributeError:
+        import pdb; pdb.set_trace()
     langs = "en es de ar vi hi zh".split()
 
     if heatmap_type == "question-context-gxlt":
@@ -79,7 +82,7 @@ if __name__ == "__main__":
             fmt=".1f",
             vmin=min_value,
             vmax=max_value,
-            cbar_kws={"label": metric},
+            cbar=False  # Add this line to hide the color bar
         )
         plt.title(f"mBERT-qa-en, ZS")
         plt.xlabel("Context Language")
@@ -100,7 +103,7 @@ if __name__ == "__main__":
             fmt=".1f",
             vmin=-5,
             vmax=22,
-            cbar_kws={"label": f"Δ {metric}"},
+            cbar=False  # Add this line to hide the color bar
         )
         plt.title(f"{suffix}")
         plt.xlabel("Context Language")
@@ -124,7 +127,7 @@ if __name__ == "__main__":
             score = {"f1_gxlt": score, "temp": temp, "ntl": ntl}
             scores.append(score)
         df = pd.DataFrame.from_records(scores)
-        temp_order = ["16", "8", "4", "2"]
+        temp_order = ["18", "8", "4", "2"]
         df["temp"] = df["temp"].astype(str)
         df["temp"] = pd.Categorical(df["temp"], categories=temp_order)
         df.sort_values(["temp", "ntl"])
@@ -138,11 +141,11 @@ if __name__ == "__main__":
             fmt=".2f",
             vmin=vmin,
             vmax=vmax,
-            cbar_kws={"label": f"{metric} (G-XLT)"},
+            cbar=False  # Add this line to hide the color bar
         )
         plt.title(f"{suffix}")
-        plt.xlabel("NTL")
-        plt.ylabel("Temperature")
+        plt.xlabel("Number of Target Languages (ntl)")
+        plt.ylabel("Temperature (t)")
         plt.tight_layout()
         plt.savefig(
             f"{output_dir}/heatmap-temp-ntl-gxlt-{suffix.lower().replace(' ', '').replace('+', ',')}_{testset.lower()}_{metric.lower()}.png"

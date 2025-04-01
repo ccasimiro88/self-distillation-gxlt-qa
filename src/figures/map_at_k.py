@@ -1,6 +1,7 @@
 """
 Compute and plot the probability distributions of the teacher model "mbert-qa-en" on the training dataset XQuAD.
 """
+
 from transformers import AutoTokenizer, AutoModelForQuestionAnswering
 import torch
 import json
@@ -9,6 +10,7 @@ import random
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
 
 def get_probs(model, tokenizer, question, text, answer_correct):
@@ -37,61 +39,105 @@ def get_probs(model, tokenizer, question, text, answer_correct):
 
 
 def plot(prob, answer_correct_idx, prob_type):
-    plt.plot(
-        range(len(prob)),
-        prob,
+    # Set the style and parameters for high-quality figures
+    sns.set_theme(
+        style="whitegrid",
+        rc={
+            "figure.figsize": (10, 6),
+            "figure.dpi": 300,
+            "savefig.dpi": 300,
+            "font.size": 18,
+            "axes.titlesize": 18,
+            "axes.labelsize": 18,
+            "legend.fontsize": 18,
+            "xtick.labelsize": 18,
+            "ytick.labelsize": 14,
+            "lines.linewidth": 2,
+            "lines.markersize": 6,
+        },
     )
 
+    # Create the figure and axis objects
+    plt.figure()
+
+    # Convert probability data to a DataFrame for seaborn
+    df = pd.DataFrame({"Position": range(len(prob)), "Probability": prob})
+
+    # Plot the probability curve using seaborn
+    sns.lineplot(
+        data=df,
+        x="Position",
+        y="Probability",
+        label=f"Probability of START Position",
+        color="blue",
+        linewidth=1.5,
+    )
+
+    # Define the delta for the shaded region
     delta = 10
+
+    # Add vertical lines to indicate the start position
     plt.axvline(
         x=answer_correct_idx[0] - delta,
-        color="g",
-        linestyle=":",
-        label="start position",
+        color="green",
+        linestyle="--",
+        # label="Position Range",
+        linewidth=1.5,
     )
     plt.axvline(
-        x=answer_correct_idx[0] + delta,
-        color="g",
-        linestyle=":",
-        label="start position",
+        x=answer_correct_idx[0] + delta, color="green", linestyle="--", linewidth=1.5
     )
-    plt.annotate(
-        f"∆",
-        xy=(answer_correct_idx[0] - 20, 0.015),
-        xytext=(answer_correct_idx[0] + 30, 0.0157),
-        arrowprops=dict(arrowstyle="<->", connectionstyle="arc3"),
-        horizontalalignment="right",
-        verticalalignment="top",
-    )
-    plt.annotate(
-        f"{prob_type}",
-        xy=(answer_correct_idx[0], 0),
-        xytext=(answer_correct_idx[0] + 50, 0.007),
-        arrowprops=dict(arrowstyle="->", connectionstyle="arc3"),
-        horizontalalignment="right",
-        verticalalignment="top",
-    )
+
+    # Highlight the region of interest
     plt.axvspan(
         answer_correct_idx[0] - delta,
         answer_correct_idx[0] + delta,
-        facecolor="g",
+        facecolor="green",
         alpha=0.3,
     )
-    plt.ylabel("probability")
-    plt.xlabel(f"{prob_type} token positions")
 
+    # Annotate the distance delta with a double-headed arrow
+    plt.annotate(
+        f"Δ",
+        xy=(answer_correct_idx[0] - 20, 0.015),
+        xytext=(answer_correct_idx[0] + 30, 0.0157),
+        arrowprops=dict(arrowstyle="<->", connectionstyle="arc3", color="black"),
+        fontsize=12,
+        horizontalalignment="right",
+        verticalalignment="top",
+    )
+
+    # Annotate the prob_type
+    plt.annotate(
+        f"{prob_type.upper()}",
+        xy=(answer_correct_idx[0], 0),
+        xytext=(answer_correct_idx[0] + 50, 0.007),
+        arrowprops=dict(arrowstyle="->", connectionstyle="arc3", color="black"),
+        fontsize=12,
+        horizontalalignment="right",
+        verticalalignment="top",
+    )
+
+    # Label the axes
+    plt.ylabel(f"Probability", fontsize=14)
+    plt.xlabel(f"Token Positions", fontsize=14)
+
+    # Adjust x-ticks for better readability
     xticks = [i for i in range(0, len(prob), 40)]
     xticks.append(answer_correct_idx[0])
-    xticks.remove(240)
-    plt.xticks(
-        sorted(
-            xticks,
-            reverse=True,
-        )
-    )
+    xticks = sorted(set(xticks), reverse=True)
+    plt.xticks(xticks, fontsize=12)
+
+    # Set y-axis limits
     plt.ylim(bottom=0)
-    plt.savefig(f"./runs/figures/map_at_k_plot_{prob_type}.png")
-    plt.clf()
+
+    # Add a legend
+    plt.legend(fontsize=12)
+
+    # Improve layout and save the figure
+    plt.tight_layout()
+    plt.savefig(f"./runs/figures/map_at_k_plot_{prob_type}.png", dpi=300)
+    plt.close()
 
 
 if __name__ == "__main__":
@@ -128,4 +174,4 @@ if __name__ == "__main__":
         model, tokenizer, question, text, answer_correct
     )
     plot(answer_start_probs, answer_correct_idx, "start")
-    plot(answer_end_probs, answer_correct_idx, "end")
+    # plot(answer_end_probs, answer_correct_idx, "end")

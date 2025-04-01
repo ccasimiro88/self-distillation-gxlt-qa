@@ -1,5 +1,6 @@
 venv*/
 runs/
+new_runs/
 corpora/
 *.pyc
 **/.png
