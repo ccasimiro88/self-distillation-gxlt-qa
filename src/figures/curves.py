@@ -5,26 +5,24 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.signal import savgol_filter
 
-# Set the style and parameters for high-quality figures
-sns.set_theme(
-    style="whitegrid",
-    rc={
-        "figure.figsize": (10, 6),
-        "figure.dpi": 300,
-        "savefig.dpi": 300,
-        "font.size": 18,
-        "axes.titlesize": 18,
-        "axes.labelsize": 18,
-        "legend.fontsize": 18,
-        "xtick.labelsize": 18,
-        "ytick.labelsize": 18,
-        "lines.linewidth": 2,
-        "lines.markersize": 6,
-    },
-)
-
 
 def plot_alphas(input_file, label):
+    sns.set_theme(
+        style="whitegrid",
+        rc={
+            "figure.figsize": (10, 6),
+            "figure.dpi": 300,
+            "savefig.dpi": 300,
+            "font.size": 18,
+            "axes.titlesize": 18,
+            "axes.labelsize": 18,
+            "legend.fontsize": 18,
+            "xtick.labelsize": 18,
+            "ytick.labelsize": 18,
+            "lines.linewidth": 2,
+            "lines.markersize": 6,
+        },
+    )
     df = pd.read_csv(input_file)
     x = df["Step"]
     y = df["Value"]
@@ -39,6 +37,22 @@ def plot_alphas(input_file, label):
 
 
 def get_alphas_plots(input_files):
+    sns.set_theme(
+        style="whitegrid",
+        rc={
+            "figure.figsize": (10, 6),
+            "figure.dpi": 300,
+            "savefig.dpi": 300,
+            "font.size": 18,
+            "axes.titlesize": 18,
+            "axes.labelsize": 18,
+            "legend.fontsize": 18,
+            "xtick.labelsize": 18,
+            "ytick.labelsize": 18,
+            "lines.linewidth": 2,
+            "lines.markersize": 6,
+        },
+    )
     plt.figure(figsize=(10, 6))  # Create a single figure for both plots
     
     colors = ["blue", "red"]
@@ -88,10 +102,26 @@ def get_alphas_plots(input_files):
     plt.tight_layout()
     plt.savefig(f"./runs/figures/curve-MAP@k-alphas-combined.png")
     plt.show()
-    plt.clf()
+    plt.close()
 
 
 def plot_scores(scores, label_to_line, label_to_color, label):
+    sns.set_theme(
+        style="whitegrid",
+        rc={
+            "figure.figsize": (10, 6),
+            "figure.dpi": 300,
+            "savefig.dpi": 300,
+            "font.size": 18,
+            "axes.titlesize": 18,
+            "axes.labelsize": 18,
+            "legend.fontsize": 18,
+            "xtick.labelsize": 18,
+            "ytick.labelsize": 18,
+            "lines.linewidth": 2,
+            "lines.markersize": 6,
+        },
+    )
     x = list(range(7))
     y = [scores.get(ntl, None) for ntl in x]
 
@@ -107,6 +137,22 @@ def plot_scores(scores, label_to_line, label_to_color, label):
 def get_models_plots(
     models, score_type, models_labels, label_to_line, label_to_color, metric
 ):
+    sns.set_theme(
+        style="whitegrid",
+        rc={
+            "figure.figsize": (10, 6),
+            "figure.dpi": 300,
+            "savefig.dpi": 300,
+            "font.size": 18,
+            "axes.titlesize": 18,
+            "axes.labelsize": 18,
+            "legend.fontsize": 18,
+            "xtick.labelsize": 18,
+            "ytick.labelsize": 18,
+            "lines.linewidth": 2,
+            "lines.markersize": 6,
+        },
+    )
     results_eval_dev = f"./runs/scores/results-all-{metric.lower()}-mlqa-dev-3.csv"
     df_all_dev = pd.read_csv(results_eval_dev)
 
@@ -116,7 +162,7 @@ def get_models_plots(
             ntl: float(
                 df_all_dev[df_all_dev["model"] == model.replace("ntl-2", f"ntl-{ntl}")][
                     score_type
-                ]
+                ].iloc[0]
             )
             for ntl in range(7)
             if not ("pqt-q-random" in model and ntl == 0)
@@ -133,7 +179,7 @@ def get_models_plots(
         f"./runs/figures/curve-{metric.lower()}-{score_type}-ntl_mBERT-qa-en_mlqa-dev.png"
     )
     plt.show()
-    plt.clf()
+    plt.close()
 
 
 if __name__ == "__main__":
@@ -157,7 +203,7 @@ if __name__ == "__main__":
     label_to_color = {
         "mBERT-qa-en, skd": "b",
         "mBERT-qa-en, skd, mAP@10": "b",
-        "mBERT-qa-en, ce": "g",
+        "mBERT-qa-en, ce": "r",
     }
 
     for metric in ["F1", "EM"]:

@@ -3,6 +3,7 @@ import pandas as pd
 import json
 from pandas.api.types import CategoricalDtype
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 import os
 import math
 import re
@@ -40,6 +41,26 @@ def score_question_context_matrix(file, langs, score_type):
     df = df.pivot(index="question_lang", columns="context_lang", values=score_type)
 
     return df
+
+
+# Create a custom colormap that transitions from red to white to Blues
+def create_custom_red_to_blues_cmap():
+    # Get the 'Blues' colormap
+    blues = plt.cm.Blues
+    # Get a red color for negative values
+    red = plt.cm.Reds
+    
+    # Create a custom colormap
+    colors_neg = red(np.linspace(0.9, 0.3, 128))  # Less intense red
+    colors_pos = blues(np.linspace(0.3, 0.9, 128))  # Blues similar to the Blues colormap
+    
+    # Combine colors with white in the middle
+    colors = np.vstack((colors_neg, colors_pos))
+    
+    # Create the colormap
+    custom_cmap = mcolors.LinearSegmentedColormap.from_list('red_white_blues', colors)
+    
+    return custom_cmap
 
 
 if __name__ == "__main__":
@@ -94,12 +115,20 @@ if __name__ == "__main__":
         plt.show()
         plt.clf()
 
+        # Import numpy for creating the custom colormap
+        import numpy as np
+        
         df = score_question_context_matrix(file, langs, metric.lower())
         df_dif = df - df_ref
+        
+        # Create custom colormap
+        custom_cmap = create_custom_red_to_blues_cmap()
+        
         sns.heatmap(
             df_dif,
             annot=True,
-            cmap=sns.cm.rocket_r,
+            cmap=custom_cmap,  # Use the custom colormap
+            center=0,          # Center the colormap at zero
             fmt=".1f",
             vmin=-5,
             vmax=22,
@@ -137,7 +166,7 @@ if __name__ == "__main__":
         sns.heatmap(
             df,
             annot=True,
-            cmap=sns.cm.rocket_r,
+            cmap="Blues",
             fmt=".2f",
             vmin=vmin,
             vmax=vmax,
