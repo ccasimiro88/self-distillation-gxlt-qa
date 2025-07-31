@@ -4,6 +4,7 @@ import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.signal import savgol_filter
+import numpy as np
 
 
 def plot_alphas(input_file, label):
@@ -54,47 +55,55 @@ def get_alphas_plots(input_files):
         },
     )
     plt.figure(figsize=(10, 6))  # Create a single figure for both plots
-    
+
     colors = ["blue", "red"]
-    
+
     for i, input_file in enumerate(input_files):
         name_file = os.path.basename(input_file).replace(".csv", "")
         df = pd.read_csv(input_file)
         x = df["Step"]
         y = df["Value"]
-        
-        # Smooth the data using Savitzky-Golay filter (serves as average)
-        y_smooth = savgol_filter(y, window_length=51, polyorder=3)
-        
-        # Calculate local standard deviation using residuals
-        residuals = y - y_smooth
-        rolling_std = pd.Series(residuals).rolling(window=51, center=True).std()
+
+        # Calculate moving average instead of using Savitzky-Golay filter
+        window_size = 51
+        y_smooth = pd.Series(y).rolling(window=window_size, center=True).mean()
         # Fill NaNs at the edges
-        rolling_std = rolling_std.fillna(method='ffill').fillna(method='bfill')
-        
+        y_smooth = y_smooth.fillna(method="ffill").fillna(method="bfill")
+
+        # Ensure smoothed values don't exceed 1.0
+        y_smooth = np.clip(y_smooth, 0, 1.0)
+
+        # Calculate local standard deviation
+        rolling_std = pd.Series(y).rolling(window=window_size, center=True).std()
+        # Fill NaNs at the edges
+        rolling_std = rolling_std.fillna(method="ffill").fillna(method="bfill")
+
         if "no-ce" in name_file:
             label = "mAP@10 Coefficient (without CE)"
         else:
             label = "mAP@10 Coefficient (with CE)"
-        
+
         color = colors[i % len(colors)]
-        
-        # Plot only the smoothed line
+
+        # Plot only the smoothed line (now average)
         sns.lineplot(x=x, y=y_smooth, label=label, color=color)
-        
-        # Add standard deviation band
-        plt.fill_between(
-            x, 
-            y_smooth - rolling_std, 
-            y_smooth + rolling_std, 
-            alpha=0.3, 
-            color=color
-        )
-    
+
+        # Add standard deviation band, but clip it to stay within [0, 1]
+        lower_bound = np.clip(y_smooth - rolling_std, 0, 1.0)
+        upper_bound = np.clip(y_smooth + rolling_std, 0, 1.0)
+
+        plt.fill_between(x, lower_bound, upper_bound, alpha=0.3, color=color)
+
     # Add vertical lines at specific points
     for vline_x in [0, x.max() / 3, 2 * x.max() / 3, x.max()]:
         plt.axvline(x=vline_x, ymin=0, ymax=1, color="green", linestyle="dotted")
-    
+
+    # Set y-axis limits explicitly
+    plt.ylim(0, 1.0)
+
+    # Add y-axis grid lines at regular intervals
+    plt.yticks(np.arange(0, 1.1, 0.1))
+
     sns.set_context("notebook")
     plt.xlabel("Training steps")
     plt.ylabel("mAP@10 Coefficient")
